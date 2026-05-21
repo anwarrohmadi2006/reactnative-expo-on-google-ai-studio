@@ -99,3 +99,115 @@ Setelah server web berjalan sukses, TAMPILKAN:
 
 Output sebelum server aktif hanya boleh: progres, error, tindakan perbaikan.
 ```
+
+---
+
+## 🚀 Panduan Deployment Web ke Cloudflare Pages
+
+Untuk mendeploy versi Web dari aplikasi Expo Anda secara gratis ke **Cloudflare Pages**, Anda memiliki dua opsi utama. Sangat disarankan menggunakan metode **GitHub Integration** karena bekerja sangat mulus dengan Google AI Studio.
+
+### Opsi 1: Integrasi GitHub (Sangat Disarankan)
+
+1. **Push ke GitHub dari AI Studio:**
+   - Klik menu **Settings** (ikon gerigi) di bagian atas antarmuka AI Studio.
+   - Pilih **Export to GitHub**. Ikuti otorisasi dan simpan proyek ke repository baru.
+2. **Koneksikan di Cloudflare Pages:**
+   - Login ke dashboard [Cloudflare](https://dash.cloudflare.com/), pilih menu **Workers & Pages**.
+   - Klik **Create application**, pilih tab **Pages**, lalu **Connect to Git**.
+   - Pilih repository GitHub yang baru saja dibuat.
+3. **Konfigurasi Build Cloudflare:**
+   - **Framework preset:** `None`
+   - **Build command:** `npx expo export -p web`
+   - **Build output directory:** `dist`
+   - Klik **Save and Deploy**. Website Expo Anda akan segera online.
+
+### Opsi 2: Menggunakan Wrangler CLI (Manual via Terminal AI Studio)
+
+Jika Anda ingin deploy langsung dari terminal AI Studio tanpa melalui GitHub, Anda bisa menggunakan Cloudflare Wrangler (memerlukan token Cloudflare).
+
+1. Build statis web-nya terlebih dahulu dari folder `nama-app`:
+   ```bash
+   cd nama-app
+   npx expo export -p web
+   ```
+   *Ini akan menghasilkan file HTML/CSS/JS statis di dalam folder `dist/`.*
+2. Install Cloudflare Wrangler:
+   ```bash
+   npm install -g wrangler
+   ```
+3. Deploy folder `dist` secara langsung:
+   ```bash
+   CLOUDFLARE_API_TOKEN="token_anda_di_sini" CLOUDFLARE_ACCOUNT_ID="account_id_anda" npx wrangler pages deploy dist --project-name nama-proyek-web-anda
+   ```
+   *(Catatan: Karena AI Studio tidak memiliki browser untuk otorisasi login interaktif, Anda harus menggunakan metode API Token di Environment Variables).*
+
+---
+
+## 📱 Panduan Build Aplikasi Native (.apk / .aab / .ipa)
+
+Karena lingkungan AI Studio berjalan di Cloud dan tidak memiliki Android Studio atau Xcode, metode yang paling mudah dan tepat untuk melakukan _build_ project Anda menjadi aplikasi _Native_ (Android atau iOS) adalah dengan menggunakan layanan Cloud dari Expo: **EAS (Expo Application Services)**.
+
+### Langkah-Langkah Build dengan EAS Cloud:
+
+1. **Buat Akun Expo:**
+   Jika Anda belum punya, daftar secara gratis di [expo.dev](https://expo.dev/).
+
+2. **Install EAS CLI di AI Studio:**
+   Anda perlu memasang _Command Line Interface_ dari EAS secara global di terminal:
+   ```bash
+   npm install -g eas-cli
+   ```
+
+3. **Login ke Akun EAS Anda:**
+   ```bash
+   eas login
+   ```
+   *(Masukkan username dan password Expo Anda)*
+
+4. **Inisiasi Konfigurasi Build:**
+   Masuk ke folder aplikasi Anda dan buat file pengaturan build (`eas.json`):
+   ```bash
+   cd nama-app
+   eas build:configure
+   ```
+
+5. **Konfigurasi Khusus Android APK (Opsional):**
+   Secara default, build Android menghasilkan format `.aab` (Bundle untuk rilis ke Play Store). Jika Anda ingin menghasilkan format `.apk` untuk dibagikan secara langsung/didownload pengguna (sideload), ubah file `eas.json` yang baru saja terbuat dan ubah profil `preview` dengan `buildType: "apk"`:
+   ```json
+   {
+     "build": {
+       "preview": {
+         "android": {
+           "buildType": "apk"
+         }
+       },
+       "production": {}
+     }
+   }
+   ```
+
+6. **Mulai Proses Build di Server Cloud Expo:**
+   
+   **Untuk Android APK:**
+   ```bash
+   eas build -p android --profile preview
+   ```
+   
+   **Untuk iOS IPA:**
+   *(Penting: Build iOS membutuhkan akun Apple Developer Program berbayar, Anda akan diminta login kredensial Apple saat proses ini)*
+   ```bash
+   eas build -p ios
+   ```
+
+7. **Selesai dan Download:**
+   Nantinya, Expo akan memberikan tautan URL (_Link_) di terminal. Proses kompilasi akan berjalan di server mereka sekitar 10-20 menit. Setelah sukses, Anda cukup membuka tautan tersebut untuk mendownload file `.apk`, `.aab`, atau `.ipa` aplikasi Anda dan menginstalnya di HP Anda.
+
+### 🤖 Integrasi Otomatis dengan GitHub (EAS Auto Builds)
+
+Benar sekali! Daripada Anda melakukan kompilasi (`eas build`) secara manual melalui terminal AI Studio berulang kali, Anda bisa mengotomatiskannya. Dengan skema ini, Anda cukup klik "Export to GitHub" dari AI Studio, dan sistem akan langsung membuatkan `.apk` secara otomatis:
+
+1. **Ekspor Proyek ke GitHub:** Klik menu pengaturan (ikon gerigi) di pojok kiri atas AI Studio, lalu pilih **Export to GitHub** ke repo Anda.
+2. **Konek di Expo Dashboard:** Buka dashboard web [expo.dev](https://expo.dev), buka _project_ Anda.
+3. **Hubungkan Repo Github:** Di menu sidebar kiri, masuk ke menu **GitHub**. Klik tombol **Connect a repository** dan izinkan Expo mengakses repository GitHub Anda.
+4. **Aktifkan Auto Builds:** Setelah Repo terhubung, Anda bisa mengatur _Build Trigger_ dari Dashboard Expo. Atur agar setiap ada perubahan kode/komit baru pada branch `main`, EAS otomatis menjalankan build.
+5. Selesai! Kini setiap Anda menyimpan dan _push_ perubahan kode dari AI Studio ke GitHub, Anda tinggal mengecek dashboard Expo dan mendownload APK terbarunya tanpa memusingkan server manual.
