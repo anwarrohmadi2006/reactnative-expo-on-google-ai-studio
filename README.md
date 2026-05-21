@@ -211,3 +211,36 @@ Benar sekali! Daripada Anda melakukan kompilasi (`eas build`) secara manual mela
 3. **Hubungkan Repo Github:** Di menu sidebar kiri, masuk ke menu **GitHub**. Klik tombol **Connect a repository** dan izinkan Expo mengakses repository GitHub Anda.
 4. **Aktifkan Auto Builds:** Setelah Repo terhubung, Anda bisa mengatur _Build Trigger_ dari Dashboard Expo. Atur agar setiap ada perubahan kode/komit baru pada branch `main`, EAS otomatis menjalankan build.
 5. Selesai! Kini setiap Anda menyimpan dan _push_ perubahan kode dari AI Studio ke GitHub, Anda tinggal mengecek dashboard Expo dan mendownload APK terbarunya tanpa memusingkan server manual.
+
+---
+
+## 🔁 Panduan Remix Project di Google AI Studio
+
+Jika Anda melihat aplikasi/project AI Studio yang dibagikan (Shared App) oleh pengguna lain dan ingin melakukan modifikasi, Anda bisa menggunakan fitur **Remix Project**.
+
+### Apa Itu Remix Project?
+Remix memungkinkan Anda menduplikasi seluruh *source code* dan *environment* dari proyek yang sudah ada ke dalam akun AI Studio Anda sendiri. Anda bebas mengedit, memperbaiki, atau menambahkan fitur baru tanpa mengganggu proyek aslinya.
+
+### Strategi Remix Tingkat Lanjut & Komprehensif:
+
+#### 1. Persiapan Awal (Duplikasi Workspace)
+Pada halaman aplikasi (Shared App), klik tombol **Remix** di kanan atas antarmuka AI Studio. Sistem akan membongkar seluruh _source code_ dan menempatkannya ke dalam Virtual Environment (Container) yang 100% terisolasi dan baru untuk Anda.
+
+#### 2. Atasi Siklus *Stateless Server* (Server Mati Saat Remix)
+Saat container baru terbentuk untuk Anda, **Dev Server Expo tidak otomatis berjalan**, dan *session* Ngrok lama milik pembuat asli sudah mati. **Jangan langsung meminta AI mengubah UI, Database, atau Fitur.** Meminta perubahan kode *sebelum* server hidup akan menyebabkan error kompilasi dan _blind-coding_ (AI meraba-raba tanpa melihat preview).
+
+Kirimkan **Prompt Pemanasan (Warm-Up)** sebagai instruksi pertama Anda:
+> *"Saya baru saja me-remix proyek ini. Fokus mutlak pertama Anda: Jangan ubah logika UI atau aplikasi apa pun! Tolong jalankan ulang server-nya. Hapus cache folder `nama-app/.expo`, panggil npm dev script untuk menginisiasi Expo Web + Tunnel, lalu verifikasi dari log Ngrok untuk URL terbarunya. Tuliskan kepada saya URL HTTP(S) dan `exp://` yang baru!"*
+
+#### 3. Injeksi "System Prompt" ke Memori Proyek (`AGENTS.md`)
+Praktik _Continuous Development_ terbaik di AI Studio agar AI tidak "lupa" tentang identitas proyek (bahwa ini expo, harus pakai Ngrok tunnel, dan ada bypass khusus) adalah dengan mengunci instruksi tersebut di dalam _Project Workspace Root_.
+Setelah server jalan, perintahkan hal berikut pada prompt kedua:
+> *"Tolong salin **System Prompt Mutlak** dari file README.md dan simpan ke dalam file `AGENTS.md` di level _root_. Jadikan itu pedoman permanen untuk setiap _turn_ Anda di sesi remix ini."*
+*(Catatan: Google AI Studio secara khusus didesain untuk membaca file `AGENTS.md` atau `GEMINI.md` otomatis sebagai instruksi sistem tambahan persisten).*
+
+#### 4. Penyesuaian Dynamic Links secara Real-Time
+Setiap sesi _remix_ atau manakala _container idle_, URL Ngrok (`exp://...` dan `https://...`) akan menghasilkan sekuriti _hash_ URL yang sepenuhnya baru. 
+- **Di Expo Go (Mobile)**: Hapus *recent apps* yang lama, ketik ulang/scan URL `exp://` yang baru diberikan AI.
+- **Di API/Backend Eksternal**: Jika Anda me-remix proyek yang memiliki *webhook* atau integrasi API ketiga (seperti Firebase/Supabase redirect), pastikan untuk meng-update Webhook URL mereka ke URL Ngrok Anda yang baru.
+
+Dengan mengikuti metodologi ini (**Restart Server** ➔ **Verifikasi Tunnel & URL** ➔ **Kunci Instruksi di AGENTS.md** ➔ **Baru Coding Fitur Baru**), proses *Remix Project* Anda akan berjalan super mulus, profesional, anti-*crash*, dan langsung bisa dicicipi hasilnya secara komprehensif!
