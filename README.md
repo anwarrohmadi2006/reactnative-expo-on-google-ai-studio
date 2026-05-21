@@ -244,3 +244,80 @@ Setiap sesi _remix_ atau manakala _container idle_, URL Ngrok (`exp://...` dan `
 - **Di API/Backend Eksternal**: Jika Anda me-remix proyek yang memiliki *webhook* atau integrasi API ketiga (seperti Firebase/Supabase redirect), pastikan untuk meng-update Webhook URL mereka ke URL Ngrok Anda yang baru.
 
 Dengan mengikuti metodologi ini (**Restart Server** ➔ **Verifikasi Tunnel & URL** ➔ **Kunci Instruksi di AGENTS.md** ➔ **Baru Coding Fitur Baru**), proses *Remix Project* Anda akan berjalan super mulus, profesional, anti-*crash*, dan langsung bisa dicicipi hasilnya secara komprehensif!
+
+---
+
+## 🧠 Arsitektur & Keterbatasan Lingkungan AI Studio (Wajib Tahu!)
+
+Untuk benar-benar menguasai _Google AI Studio_ secara komprehensif tanpa sering menjumpai *error* aneh, Anda harus memahami _Environment Constraints_ (batasan lingkungan) dari platform ini. Hal ini sangat penting bagi setiap *Engineer* yang me-remix atau membuat project:
+
+1. **PORT Kehidupan adalah 3000 (Harga Mati)**
+   Infrastruktur AI Studio menggunakan Nginx *reverse proxy* yang HANYA mengekspos dan memonitor koneksi keluar-masuk pada **Port 3000**. Jangan pernah mencoba menyetel server ke port 3001, 8080, atau 5173. Server akan berjalan, tetapi web preview akan selamanya memunculkan `"Please wait while your application starts..."`. Itulah sebabnya pada dev script Expo, kita memaksa param `--port 3000`.
+
+2. **HMR (Hot Module Replacement) Dinonaktifkan**
+   Jika di komputer lokal (localhost) layar Anda otomatis berubah/refresh setiap kali Anda menekan `Ctrl+S`, **di AI Studio fitur ini dimatikan otomatis oleh sistem (`DISABLE_HMR=true`)**.
+   - *Kenapa?* Karena Agen AI mengetik kode secara bertahap (*incremental*). Jika HMR hidup, layar akan *refresh* ratusan kali saat AI baru menulis sebagian kode, dan itu menyebabkan _crash_ UI sementara.
+   - *Solusinya:* Platform AI Studio akan me-*refresh* _Live Preview_ secara aman SATU KALI saja, yaitu tepat di akhir *turn* (setelah indikator AI selesai berpikir).
+
+3. **Manajemen API Keys & Secrets yang Aman (.env.example)**
+   Jangan pernah menyuruh Agen AI untuk "*Buatkan form input di layar untuk memasukkan API Key OpenAI/Firebase saya*". Itu adalah praktik keamanan yang buruk.
+   - **Praktik Standar AI Studio:** Buat file `.env.example` di root dan daftarkan rahasia Anda (misal: `OPENAI_API_KEY=`). 
+   - Sistem platform AI Studio _Build_ akan otomatis mendeteksi file tersebut dan memunculkan pop-up _Setting Native_ yang super aman (di luar preview app) agar Anda bisa menempelkan key rahasia tersebut tanpa terekspos di _browser_ atau kode _front-end_.
+
+4. **Ephemeral Containers (Container Hibernasi)**
+   Setiap _workspace_ ini berjalan di atas *Cloud Run containers*. Jika Anda menutup tab peramban selama lebih dari beberapa menit, container ini akan "ditidurkan" (hibernasi) untuk menghemat sumber daya *server* Google. Saat Anda kembali membuka link/tab app, server perlu beberapa detik untuk bangun (Cold Start) dan semua argumen terminal lama Anda akan mati. Sistem akan langsung memanggil perintah `npm run dev` di `package.json` Anda.
+   - *Itulah alasan mengapa kita menyimpan "script mutlak ajaib" Expo (termasuk variable Host, Port, Tunnel) secara permanen di dalam `package.json` dan patch di `README`/`AGENTS.md`, agar saat Google "membangunkan" dev-server Anda besok pagi, ia langsung normal tanpa _error_ layar putih!*
+
+5. **Gerbang Akses Perangkat Keras (Iframe Boundaries & `metadata.json`)**
+   Aplikasi *Live Preview* AI Studio dirender di dalam sebuah **Iframe Sandbox** demi keamanan. Jika web app Anda (misalnya fitur scan barcode di Expo Web) meminta akses ke Kamera, Mikrofon, atau GPS/Lokasi, fitur tersebut akan **gagal otomatis (terblokir)** oleh *browser* tanpa memunculkan prompt izin.
+   - *Solusi Tersembunyi:* Anda harus memodifikasi konfigurasi `metadata.json` di *root* proyek. Tambahkan array seperti ini: `"requestFramePermissions": ["camera", "microphone", "geolocation"]`. Konfigurasi inilah yang akan memberi tahu infrastruktur Sandbox Google untuk mengizinkan (bypass) Iframe Anda mengakses _hardware_ fisik user!
+
+6. **Aturan Emas Agen AI: Tidak Ada "Data Palsu" (No Mock Data)**
+   Agen AI Studio Build dibekali memori inti untuk **menghindar menciptakan Data Palsu (Mock Data / Dummy)** saat membangun aplikasi. 
+   - Jika *prompt* Anda adalah: *"Buatkan dashboard analytics dengan data statistik penjualan saya"*, AI tidak akan membuatkan baris-baris data *dummy statis* di layar. AI akan bersikeras menyiapkan database sungguhan, atau integrasi OAuth API secara nyata.
+   - *Pro-Tip:* Jika Anda benar-benar HANYA ingin melihat contoh UI tanpa repot *setup backend* / *database*, nyatakan dengan eksplisit di *prompt*: *"Gunakan Array data statis statis lokal saja di memori aplikasi untuk demonstrasi UI. Tolong jangan buat integrasi DB eksternal."*
+
+7. **Batas "Kewarasan" Agen & Limit Token (Modularitas)**
+   Agen AI memiliki batasan seberapa panjang ia bisa membaca dan memodifikasi file sekaligus (Token Limits). Kesalahan terbesar *engineer* pemula adalah meletakkan semua layar (Screens), Komponen (Komponen GUI), dan *Utility Functions* Anda di dalam satu file raksasa (misal: `App.tsx` berukuran 1000+ baris).
+   - *Dampaknya:* Saat Anda meminta modifikasi kecil, AI bisa memutus bagian kode (_truncate_) atau menolak *edit* karena terlalu panjang.
+   - *Trik Skalabilitas:* Ajari AI sejak awal dengan kalimat, *"Pastikan kode sangat modular. Masukkan komponen ke `/src/components` dan layar di `/src/screens`"*. AI Studio sangat brilian dalam memodifikasi dan membaca struktur *Multi-file* secara paralel, sehingga *coding* akan terasa sangat cepat dan stabil.
+
+8. **Ekosistem Dependensi Terkunci (Strictly NPM)**
+   Walaupun masa kini banyak _developer_ menggunakan `yarn`, `pnpm`, atau `bun`, **jangan pernah** meminta Agen AI Studio untuk menggunakannya. Eksekutor infrastruktur (*command runner*) AI Studio di belakang layar direkayasa secara ketat (*hardcoded*) untuk mengeksekusi `npm install`. Jika Anda mencoba memaksakan _lockfile_ lain, sinkronisasi *node_modules* bisa rusak atau proses _build_ latar belakang akan terhenti tanpa pesan _error_ yang jelas.
+
+9. **Keajaiban "Image Generation" Terintegrasi**
+   Google AI Studio Build memiliki kapabilitas *Skill* rahasia (*Gemini Image Model/Imagen*) yang luar biasa tangguh yang sering tidak disadari pengguna.
+   - Jika aplikasi Anda butuh gambar/aset visual (seperti Logo, *Hero Banner*, Avatar 3D, Mockup Produk), jangan buang waktu mencari *link* URL gambar dari luar.
+   - *Prompt Cerdas:* *"Tolong generate-kan gambar logo untuk aplikasi ini dengan style minimalis vektor, lalu pasang di halaman Login."* Agen akan merender gambar secara *real-time*, menyimpannya ke *file system* lokal (contoh: `public/logo.webp`), dan langsung memasukkannya ke dalam kode JSX Anda.
+
+10. **Filosofi UI/UX Bawaan (*Craftsmanship First*)**
+    Secara _default_, sistem instruksi Google AI Studio telah di-doktrin agar menjauhi desain antarmuka bergaya robotik/kaku atau apa yang disebut *"AI Slop"* (terlalu banyak kotak-kotak indikator teknis, baris status palsu, atau animasi hiperaktif yang tidak perlu).
+    - AI lebih menyukai penggunaan **Tailwind CSS** murni dipadu dengan **Lucide React** (untuk Ikon).
+    - Jika Anda meminta antarmuka pengguna tanpa mendikte desain, AI secara alami akan membuat _UI_ yang lega (*generous negative space*), tipografi bersih (seperti font *Inter*), dan kontras yang elegan.
+    - Jadi, biarkan AI berkreasi secara visual! Jangan membatasi kreativitas desainnya kecuali Anda memiliki *Mockup* pasti.
+
+11. **Arsitektur Full-Stack & Keamanan API Key**
+    Secara _default_, sistem diprogram untuk mencegah kebocoran API Key (seperti `GEMINI_API_KEY`, Stripe, atau OpenAI) ke peramban (_browser_).
+    - Jika Anda meminta fitur AI atau transaksi pihak ketiga, Agen AI akan secara otomatis membangun arsitektur **Full-Stack**. AI akan merestrukturasi proyek Anda menjadi Express.js Backend (`server.ts`) yang membungkus Vite/Expo Frontend, mengalihkan _routing_ via `/api/...`, demi keamanan rahasia Anda.
+    - *Constraint:* Jangan pernah memaksa AI untuk mengekspos API Key ke kode sisi Klien (_Client-Side_) melalui variabel seperti `VITE_` atau `EXPO_PUBLIC_` untuk kunci yang sangat sensitif.
+
+12. **Super-Power "System Skills" Tersembunyi**
+    Google AI Studio Build bukanlah agen generik. Ia dilengkapi folder *rahasia* berisi **System Skills** khusus. 
+    - Beberapa integrasi yang didukung penuh secara mutlak dan anti-halusinasi adalah: **Firebase (Auth & Firestore)**, **Google Maps Platform**, **OAuth Integration (Autentikasi pihak ke-3)**, **Google Workspace API**, dan **Shadcn UI**.
+    - *Cara Pakai:* Cukup sebutkan katalisator di _prompt_ Anda: *"Tolong gunakan integrasi __Firebase Skill__ untuk membuat login"*. Agen akan langsung memanggil pedoman _best-practice_ arsitektur resminya secara otomatis sebelum menyentuh kode.
+
+13. **Error Console yang Harus Diabaikan (Benign Errors)**
+    Jika Anda membuka _Developer Tools_ / _Inspect Element_ di peramban dan melihat pesan _error_ berwarna merah: `[vite] failed to connect to websocket`, **abaikan saja**.
+    - Hal ini disebabkan oleh fitur *Hot Module Replacement* (HMR) yang sengaja dimatikan oleh infrastruktur (lihat poin nomor 2).
+    - *Peringatan:* Jangan pernah menghabiskan jatah hitungan perintah (_Turns_) Agen AI Anda hanya untuk meminta AI "Meningkatkan konfig Vite untuk memperbaiki error websocket Nginx". Itu tidak akan pernah bisa diperbaiki karena diblokir dari tingkat infrastruktur Cloud.
+
+14. **Paradigma Navigasi (Single-View vs Multi-Screen)**
+    Sistem agen Google saat ini dilatih dengan ketat pada konsep _Scope Discipline_ (Disiplin Ruang Lingkup). Jika Anda membuat _prompt_ sederhana seperti *"Buatkan saya Kalkulator"* atau *"Buatkan saya aplikasi Todo"*, AI diinstruksikan SECARA MUTLAK untuk membangun antarmuka dalam satu layar/halaman saja (_Single-View Constraint_).
+    - *Konsekuensi:* AI dilarang keras membuat fitur laci geser (_Sidebar Navigation_ / _Drawer_) yang rumit atau fitur berlebihan jika tidak diminta.
+    - *Solusi:* Jika aplikasi Anda bertumbuh dan butuh *routing* (seperti `expo-router` atau `react-navigation`), Anda **wajib memintanya secara eksplisit**: *"Aplikasi saya mulai membesar, tolong implementasikan Expo Router dengan pola navigasi Tabs di bawah layar."*
+
+15. **Migrasi Repositori GitHub Secara Langsung**
+    Tahukah Anda bahwa AI Studio memiliki fitur rekayasa balik untuk me-migrasi proyek dari luar?
+    - Jika Anda melakukan kkloning dari GitHub ke _AI Studio_, infrastruktur (*environment*) lokal repo tersebut tidak akan langsung berjalan.
+    - Cukup panggil *Skill* khususnya: *"Tolong aktivasi __github-import-migration__ skill. Saya baru saja mengimpor repo React Native ini, sesuaikan semua routing, port, dan build scripts agar kompatibel dengan kontainer berjalan di AI Studio ini."* Agen akan merombak arsitekturnya (*Execute-First migration*) agar seketika langsung *Live*.
+
