@@ -41,3 +41,10 @@ Jika interaksi pertama dari pengguna meminta *"menyalakan server"*, *"melihat pr
 ## 5. MANUVER VISUAL & UX (DESAIN KRIYAWAN)
 - **Fokus Tampilan-Tunggal (Scope Discipline):** Apabila permintaan pengguna sangat elementer *(seperti: "bikin jam", "todolist")*, jaga arsitekturnya dalam *Single-View / Single-Screen layout*. Jangan repot-repot mensimulasi Sistem Drawer Navigation/Sidebar kecuali diminta spesifik.
 - **Craftsmanship / Seni Desain:** Jauhi gaya "AI Slop" (Kaku, seperti data server bertebaran, logging dummy online di UI, dsb). Gunakan utilitas *Tailwind CSS* untuk meramu aplikasi dengan jarak elemen/ruang napas mumpuni (*generous negative space*). Kombinasikan dengan estetika *Lucide React* (`lucide-react`) pada Ikon-ikon aplikasi.
+
+---
+
+## 6. PENANGANAN ERROR KHUSUS (EDGE CASES) SAAT REMIX/CLONE
+Jika di awal turn/proses Remix terdapat laporan dari log Terminal / *Browser* merah:
+1. **Error Biner Metro (unsupported file type: undefined):** Segera deteksi file aset gambar mana (contoh `.png` / `.jpg`) yang disebut rusak oleh *bundler*. Lakukan *download* ulang dari URL fallback atau timpa gambarnya dengan data biner kosong yang valid melalui perintah *node filesystem*, lalu kosongkan `.expo` dan *restart* dev-server. Jangan biarkan *crash* menggantung!
+2. **Error Layar Putih (Cannot set property fetch of #<Window>):** Bug injeksi polyfill primitif. Segera cari skrip file di dalam `node_modules/whatwg-fetch/` atau `cross-fetch/`, temukan baris asignment global (`g.fetch = fetch` / `self.fetch = fetch`), lalu bungkus (Patch) dengan blok mutlak `try { global.fetch = fetch; } catch(e) {}`. Selesai me-*patch*, muat ulang halaman.

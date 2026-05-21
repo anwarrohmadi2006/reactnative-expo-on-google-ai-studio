@@ -322,14 +322,14 @@ Untuk benar-benar menguasai _Google AI Studio_ secara komprehensif tanpa sering 
     - Cukup panggil *Skill* khususnya: *"Tolong aktivasi __github-import-migration__ skill. Saya baru saja mengimpor repo React Native ini, sesuaikan semua routing, port, dan build scripts agar kompatibel dengan kontainer berjalan di AI Studio ini."* Agen akan merombak arsitekturnya (*Execute-First migration*) agar seketika langsung *Live*.
 
 16. **Cara Clone Repo GitHub Secara Langsung**
-    Banyak yang bertanya, *apakah AI Studio bisa langsung melakukan clone dari GitHub?* **Ya, sangat bisa!** Ada dua jalur utama:
-    - **Jalur UI Dashboard (Terbaik):** Saat Anda berada di halaman awal/dashboard Google AI Studio Build, alih-alih mengetik *prompt* untuk membuat web baru, biasanya ada opsi/tombol menu untuk **Import from GitHub** atau **Connect Repository**. Tempelkan URL Repo Anda, dan Google akan menyalin semuanya ke dalam container baru.
-    - **Jalur Terminal (Dalam Workspace):** Jika Anda sudah berada di dalam layar *coding* ini, Anda bisa menyuruh AI agen: *"Tolong bersihkan direktori ini dan lakukan git clone dari [URL_GITHUB_ANDA] ke folder root."*
+    Banyak yang bertanya, *apakah AI Studio bisa langsung melakukan clone dari GitHub?* **Ya, sangat bisa!** Lantaran tidak ada tombol spesifik "Connect GitHub", jalurnya adalah lewat agen secara memikat:
+    - **Jalur Terminal AI (Chat):** Mulailah dengan membuat _workspace_ kosong di AI Studio. Kemudian, suruh AI agen: *"Tolong bersihkan direktori ini dan lakukan git clone dari [URL_GITHUB_ANDA] ke folder root."* Agen akan menjalankan eksekusi bash di balik layar!
+    - **Jalur Extract ZIP:** Download file `.zip` dari GitHub Anda. Seret (Drag & Drop) file zip tersebut ke *File Explorer* Workspace Anda, dan mintalah Agen: *"Tolong ekstrak file zip ini dan letakkan di root directory."*
     
     🔥 **PERINGATAN PASCA-CLONE:**
     Setelah *source code* GitHub Anda masuk, **jangan panggil _npm start_ / _npm run dev_ secara langsung!** Pasti akan *error*, *Crash*, atau *Stuck* / *Loading* putih selamanya.
     Mengapa? Karena proyek dari luar biasanya di-setting untuk `localhost:5173` atau `localhost:8080`.
-    - **Tindakan Wajib Setelah Clone:** Kirim *prompt* pertama kepada agen: *"Saya baru saja clone repo eksternal. Tolong gunakan skill __github-import-migration__. Sesuaikan `package.json` saya agar berjalan di HOST 0.0.0.0 dan PORT 3000 secara mutlak. Tambahkan proxy Nginx jika diminta, lalu jalankan `npm install` dan _start server_."* AGEN akan me-rekayasa balik proyek Anda agar sesuai dengan infrastruktur Google Cloud!
+    - 👉 **Solusi Lengkap:** Baca file **[`CLONE_GUIDE.md`](./CLONE_GUIDE.md)** yang berisi instruksi dan **"Super Prompt"** mutlak yang harus Anda salin sesaat setelah melakukan *clone* agar aplikasi langsung ter-embed dan normal kembali.
 
 17. **Jebakan Iframe Preview & Tombol "Buka di Tab Baru"**
     Jendela _Preview Web_ yang ada di sebelah kanan layar Anda BUKANLAH peramban utuh, melainkan dirender menggunakan teknologi **Iframe**.
@@ -357,5 +357,14 @@ Untuk benar-benar menguasai _Google AI Studio_ secara komprehensif tanpa sering 
     - **Trik `AGENTS.md`:** Sebagai pembuat asli, buatlah file bernama `AGENTS.md` di level _root_ aplikasi Anda SEBELUM Anda membagikan (*Share*) link aplikasinya.
     - Masukkan seluruh *"System Prompt Mutlak"* atau *"Strategi Pemanasan Remix"* Anda ke dalam file `AGENTS.md` tersebut. (Contoh isinya: *"Jika pengguna meminta menghidupkan server, Hapus folder .expo, jalankan dev script yang ada tunnel NGROK-nya, lalu tampilkan link exp://..."*).
     - **Hasil Ajaibnya:** Saat orang lain me-remix proyek Anda, *AI Agent Workspace* mereka akan secara senyap **membaca file `AGENTS.md`** tersebut sebagai instruksi inti. Pengguna baru sekarang cukup mengetik *prompt* sangat pendek di kotak chat (misal: *"Halo, tolong nyalakan servernya"*), dan Agen AI akan mengeksekusi penanganan Expo/Ngrok yang rumit persis seperti The Matrix, tanpa perlu orang tersebut tahu soal instruksi super kompleks di belakangnya!
+
+22. **Troubleshooting 101: Error Khas Saat Remix & Clone GitHub**
+    Ada dua *error* unik yang sangat sering menjangkiti proyek Expo/React Native pada AI Studio saat Anda melakukan "Remix" proyek lama atau melakukan "Clone" langsung dari GitHub:
+    - **A. Gambar Hilang / Error Metro "unsupported file type: undefined":**
+      *Penyebab:* Saat proyek dibongkar-muat (*unpack*) oleh Container Cloud, file biner gambar `png` bawaan (seperti *react-logo.png*) seringkali mengalami kerusakan (_corrupted magic headers_) akibat distorsi _encoding_ file system sementara.
+      *Solusi ke Agen AI:* *"Gambar saya error unsupported file type di Metro bundler. Tolong download ulang / timpa file gambar `react-logo.png` & `tutorial-web.png` tersebut menggunakan URL raw github Expo, atau buatkan dummy transparan via node script. Lalu restart ngrok."*
+    - **B. Layar Merah/Putih "Cannot set property fetch of #<Window>":**
+      *Penyebab:* Ekosistem modern (*browser constraints*) kini membuat properti objek `window.fetch` bersifat mutlak (*read-only getter*). Sayangnya, saat clone/remix, package lama seperti `whatwg-fetch` dan `cross-fetch` secara brutal mencoba melakukan `window.fetch = fetch`. Ini membuat layar Klien _crash_ total!
+      *Solusi ke Agen AI:* *"Browser Klien saya ng-Crash dengan tulisan Uncaught TypeError: Cannot set property fetch. Tolong lacak library `whatwg-fetch` & `cross-fetch` di dalam node_modules, lalu patch paksa baris `g.fetch = fetch` / `self.fetch = fetch` mereka menjadi blok `try { ... } catch(e) {}`. Setelan itu restart server!"*
 
 
