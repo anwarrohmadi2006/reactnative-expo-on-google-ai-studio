@@ -321,3 +321,34 @@ Untuk benar-benar menguasai _Google AI Studio_ secara komprehensif tanpa sering 
     - Jika Anda melakukan kkloning dari GitHub ke _AI Studio_, infrastruktur (*environment*) lokal repo tersebut tidak akan langsung berjalan.
     - Cukup panggil *Skill* khususnya: *"Tolong aktivasi __github-import-migration__ skill. Saya baru saja mengimpor repo React Native ini, sesuaikan semua routing, port, dan build scripts agar kompatibel dengan kontainer berjalan di AI Studio ini."* Agen akan merombak arsitekturnya (*Execute-First migration*) agar seketika langsung *Live*.
 
+16. **Cara Clone Repo GitHub Secara Langsung**
+    Banyak yang bertanya, *apakah AI Studio bisa langsung melakukan clone dari GitHub?* **Ya, sangat bisa!** Ada dua jalur utama:
+    - **Jalur UI Dashboard (Terbaik):** Saat Anda berada di halaman awal/dashboard Google AI Studio Build, alih-alih mengetik *prompt* untuk membuat web baru, biasanya ada opsi/tombol menu untuk **Import from GitHub** atau **Connect Repository**. Tempelkan URL Repo Anda, dan Google akan menyalin semuanya ke dalam container baru.
+    - **Jalur Terminal (Dalam Workspace):** Jika Anda sudah berada di dalam layar *coding* ini, Anda bisa menyuruh AI agen: *"Tolong bersihkan direktori ini dan lakukan git clone dari [URL_GITHUB_ANDA] ke folder root."*
+    
+    🔥 **PERINGATAN PASCA-CLONE:**
+    Setelah *source code* GitHub Anda masuk, **jangan panggil _npm start_ / _npm run dev_ secara langsung!** Pasti akan *error*, *Crash*, atau *Stuck* / *Loading* putih selamanya.
+    Mengapa? Karena proyek dari luar biasanya di-setting untuk `localhost:5173` atau `localhost:8080`.
+    - **Tindakan Wajib Setelah Clone:** Kirim *prompt* pertama kepada agen: *"Saya baru saja clone repo eksternal. Tolong gunakan skill __github-import-migration__. Sesuaikan `package.json` saya agar berjalan di HOST 0.0.0.0 dan PORT 3000 secara mutlak. Tambahkan proxy Nginx jika diminta, lalu jalankan `npm install` dan _start server_."* AGEN akan me-rekayasa balik proyek Anda agar sesuai dengan infrastruktur Google Cloud!
+
+17. **Jebakan Iframe Preview & Tombol "Buka di Tab Baru"**
+    Jendela _Preview Web_ yang ada di sebelah kanan layar Anda BUKANLAH peramban utuh, melainkan dirender menggunakan teknologi **Iframe**.
+    - *Akibatnya:* Beberapa fungsi JavaScript standar seperti `window.alert()`, pengunduhan file (Download), atau pembukaan *Pop-up/Redirect Login OAuth* (seperti Login with Google, Firebase Auth, GitHub Auth) **akan sering gagal** atau sengaja diblokir oleh batas keamanan Iframe.
+    - *Solusi Ampuh:* Biasakan menekan ikon **"Open in New Tab" (Panah Serong)** di atas pojok kanan jendela *preview* saat menguji integrasi kompleks. Mengetes aplikasi di tab yang benar-benar independen akan membebaskannya dari batasan Iframe Sandbox, dan semua fungsi otentikasi akan berjalan mulus!
+
+18. **Kolaborasi Agen Server-Side (Anda Boleh Tutup Laptop!)**
+    Ini mungkin salah satu kekuatan terhebat infrastruktur Google AI Studio: Seluruh proses kerja Agen AI mengeksekusi terminal, menganalisis struktur folder, dan menulis fitur lengkap berjalan **100% secara Asinkron di Sisi Server (Server-Side Execution)**.
+    - Jika Anda memberikan *prompt* yang sangat kompleks (misal: *"Tolong pelajari 20 file kode saya, rombak seluruh arsitektur strukturnya, analisis error, dan bangun ulang database lokal"*) — Anda **TIDAK PERLU** menatap layar peramban sampai AI selesai. 
+    - Anda bisa langsung _close tab browser_ atau mematikan laptop Anda. Server Google akan tetap membiarkan Agen AI bekerja di eksekusi latar belakang. Buka lagi tautan ruang kerja (_workspace_) Anda di waktu senggang besok pagi, dan Anda akan melihat instruksi kompleks tersebut telah diselesaikan.
+
+19. **Trik Rahasia: Upload File Drag-and-Drop**
+    Google AI Studio Build menyediakan *File Explorer* interaktif. Komunikasi Anda via teks di _chat_ bukanlah satu-satunya cara berinteraksi!
+    - Jika Anda memiliki _dataset_ Excel berformat `.csv`, _database_ lama `.sqlite`, foto statis beresolusi tinggi, atau dokumen panduan teknis PDF, Anda tidak perlu repot menyalin teksnya ke prompt.
+    - Cukup **geser dan jatuhkan (_Drag and Drop_)** file-file fisik Anda dari Desktop PC Anda langsung ke dalam panel *File Explorer* (sebelah kiri) di _workspace_ ini. 
+    - Setelah file terunggah, tinggal berikan prompt: *"Tolong baca file dataset `data_penjualan.csv` yang baru saja saya drop di _root_, lalu tampilkan Chart visualisasinya"*. Ini adalah cara tercerdas (dan paling minim token) untuk membangun aplikasi berbasis data.
+
+20. **Kode Etik Bundling Full-Stack (Vite + esbuild)**
+    Jika suatu hari aplikasi React/Expo Anda berkembang dan meminta integrasi Backend (menjadi *"Full-Stack"* menggunakan Express.js, seperti untuk menyembunyikan kunci rahasia API), Anda mungkin melihat AI mendadak merubah _build script_ dengan perintah `--bundle --platform=node --format=cjs`.
+    - *Tolong Jangan Dikembalikan!* Ini adalah **Standard Operating Procedure (SOP)** pengerahan (*deployment*) arsitektur produksi asli dari lingkungan mandiri AI Studio.
+    - Karena Node.js memiliki aturan ketat mengenai tipe ES Modules vs CommonJS, tim rekayasa memandatkan agen AI untuk merangkum seluruh kerangka _backend server_ menadi berkas tunggal utuh (`dist/server.cjs`) menggunakan alat bernama `esbuild`. Patuhi jejak *script* kompilasi ini agar hasil ekspor dan _deploy_ di Cloudflare atau GCP berjalan dengan jaminan sukses.
+
