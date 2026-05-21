@@ -1,15 +1,10 @@
 # Menjalankan Expo React Native SDK 55 di Google AI Studio
 
+⚠️ **PENTING: JIKA ANDA MENG-CLONE ATAU MEREMIX REPO INI** ⚠️
+Jika Anda baru saja meng-clone, mengunggah zip, atau mengimpor repositori ini ke Google AI Studio, **JANGAN NYALAKAN SERVER DULU!** Silakan baca Panduan Mutlak di file 👉 **[`CLONE_GUIDE.md`](./CLONE_GUIDE.md)** terlebih dahulu agar proyek Anda dijamin langsung berjalan sukses tanpa *crash*.
+
 Panduan komprehensif ini mendokumentasikan cara mengatasi berbagai tantangan dan batasan saat menjalankan Expo React Native (terutama versi SDK 55) dalam lingkungan cloud/iFrame di Google AI Studio. 
 
-## URL Publik Anda (Scan di Expo Go)
-Berdasarkan log tunneling ngrok, URL Anda yang saat ini telah aktif dan dapat Anda scan langsung menggunakan kamera atau aplikasi **Expo Go** adalah:
-
-👉 **`exp://h4y_tum-anonymous-3000.exp.direct:80`**
-
-*(Atau buka langsung Web Preview di sebelah kanan melalui `https://h4y_tum-anonymous-3000.exp.direct`)*.
-
----
 
 ## 🛠 Rangkuman Kesalahan (Error) & Code Patch Khusus
 
