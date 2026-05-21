@@ -352,3 +352,10 @@ Untuk benar-benar menguasai _Google AI Studio_ secara komprehensif tanpa sering 
     - *Tolong Jangan Dikembalikan!* Ini adalah **Standard Operating Procedure (SOP)** pengerahan (*deployment*) arsitektur produksi asli dari lingkungan mandiri AI Studio.
     - Karena Node.js memiliki aturan ketat mengenai tipe ES Modules vs CommonJS, tim rekayasa memandatkan agen AI untuk merangkum seluruh kerangka _backend server_ menadi berkas tunggal utuh (`dist/server.cjs`) menggunakan alat bernama `esbuild`. Patuhi jejak *script* kompilasi ini agar hasil ekspor dan _deploy_ di Cloudflare atau GCP berjalan dengan jaminan sukses.
 
+21. **Rahasia *Template Maker*: Mengganti "Prompt Default" Tombol Remix**
+    Secara teknis, platform AI Studio saat ini **tidak memiliki fitur** untuk memasukkan teks secara otomatis ke dalam kotak obrolan (chat box) ketika pengguna mengeklik tombol **Remix**. Namun, ada trik *Master* yang digunakan para kreator cerdas agar pengguna yang me-remix tidak perlu melakukan *copy-paste* prompt yang panjang:
+    - **Trik `AGENTS.md`:** Sebagai pembuat asli, buatlah file bernama `AGENTS.md` di level _root_ aplikasi Anda SEBELUM Anda membagikan (*Share*) link aplikasinya.
+    - Masukkan seluruh *"System Prompt Mutlak"* atau *"Strategi Pemanasan Remix"* Anda ke dalam file `AGENTS.md` tersebut. (Contoh isinya: *"Jika pengguna meminta menghidupkan server, Hapus folder .expo, jalankan dev script yang ada tunnel NGROK-nya, lalu tampilkan link exp://..."*).
+    - **Hasil Ajaibnya:** Saat orang lain me-remix proyek Anda, *AI Agent Workspace* mereka akan secara senyap **membaca file `AGENTS.md`** tersebut sebagai instruksi inti. Pengguna baru sekarang cukup mengetik *prompt* sangat pendek di kotak chat (misal: *"Halo, tolong nyalakan servernya"*), dan Agen AI akan mengeksekusi penanganan Expo/Ngrok yang rumit persis seperti The Matrix, tanpa perlu orang tersebut tahu soal instruksi super kompleks di belakangnya!
+
+
