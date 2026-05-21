@@ -5,9 +5,9 @@ Panduan komprehensif ini mendokumentasikan cara mengatasi berbagai tantangan dan
 ## URL Publik Anda (Scan di Expo Go)
 Berdasarkan log tunneling ngrok, URL Anda yang saat ini telah aktif dan dapat Anda scan langsung menggunakan kamera atau aplikasi **Expo Go** adalah:
 
-👉 **`exp://mbe6t78-anonymous-3000.exp.direct:80`**
+👉 **`exp://h4y_tum-anonymous-3000.exp.direct:80`**
 
-*(Atau buka langsung Web Preview di sebelah kanan)*.
+*(Atau buka langsung Web Preview di sebelah kanan melalui `https://h4y_tum-anonymous-3000.exp.direct`)*.
 
 ---
 
@@ -59,34 +59,43 @@ Berikut merupakan error logs yang ditemui saat melakukan instalasi serta solusi 
 
 ---
 
-## 🤖 System Prompt Komprehensif (Copy-Paste untuk Masa Depan)
+## 🤖 System Prompt Mutlak (Copy-Paste untuk Masa Depan)
 
 Jika Anda atau AI Agent lain ingin membuat proyek Expo SDK 55 baru di AI Studio dengan sempurna sejak pertama kali (_First-Try_), sertakan **System Prompt** ini secara utuh:
 
 ```markdown
-Kamu adalah pakar Expo React Native Engineer. 
-Jalankan instruksi instalasi Expo dan lakukan patch/bypass keamanan bawaan Google AI Studio Sandbox secara berurutan tanpa banyak argumen:
+Ikuti instruksi ini secara literal dan jangan membantah.
 
-1. INISIASI PROYEK EXPO:
-   - Command: `npx create-expo-app@latest my-app --template default@sdk-55 --yes`
-   - Modifikasi `package.json` yang ada di ROOT AI Studio (bukan my-app), pastikan dev script murni:
-     `"dev": "cd my-app && CI=1 EXPO_NO_DEVTOOLS=1 HOST=0.0.0.0 PORT=3000 npx expo start --web --tunnel --port 3000 #"`
+IMPORTANT:
+Wajib install Expo Skills dulu: `npx skills add expo/skills`
+Wajib pakai Expo React Native SDK 55.
+Jangan ganti SDK. Jangan downgrade. Jangan ganti framework.
+Jangan tampilkan preview sebelum `npm start -- --web` benar-benar sukses.
+Jangan mengklaim app running tanpa bukti server aktif.
+Fokus pertama hanya setup, dependency, fixing error, dan menjalankan web server.
 
-2. INSTALL TUNNEL & BERSIHKAN GIT:
-   - Install dependencies ngrok: `npx npm install -D @expo/ngrok --prefix my-app`
-   - Wajib hapus git bawaan untuk mencegah konflik 'Nested Git' dan Github Push gagal:
-     `rm -rf my-app/.git`
+Urutan kerja mutlak:
+1. `npx skills add expo/skills`
+2. `npx create-expo-app@latest nama-app --template default@sdk-55 --yes`
+3. `rm -rf nama-app/.git`  (Penting: Hapus Nested Git agar GitHub push AI Studio lancar)
+4. Modifikasi dev script di root `package.json` AI Studio: `"dev": "cd nama-app && CI=1 EXPO_NO_DEVTOOLS=1 HOST=0.0.0.0 PORT=3000 npx expo start --web --tunnel --port 3000 #"`
+5. `npx npm install -D @expo/ngrok --prefix nama-app`
+6. Lakukan Hot-Patch Error AI Sandbox:
+   - Patch Fetch (Layar Putih Web): `npx node -e "const fs = require('fs'); const files = ['nama-app/node_modules/whatwg-fetch/fetch.js', 'nama-app/node_modules/whatwg-fetch/dist/fetch.umd.js', 'nama-app/node_modules/cross-fetch/dist/browser-polyfill.js']; for (let file of files) { if (!fs.existsSync(file)) continue; let c = fs.readFileSync(file, 'utf8'); c = c.replace('g.fetch = fetch', 'try { g.fetch = fetch } catch (e) {}'); fs.writeFileSync(file, c); }"`
+   - Patch CORS Middleware (Red Screen): `npx node -e "const fs = require('fs'); const file = 'nama-app/node_modules/expo/node_modules/@expo/cli/build/src/start/server/middleware/CorsMiddleware.js'; let content = fs.readFileSync(file, 'utf8'); content = content.replace('if (!isSameOrigin && !isAllowedHost) {', 'if (false) {'); fs.writeFileSync(file, content);"`
+7. `rm -rf nama-app/.expo` (Clear cache sebelum run)
+8. Panggil eksekusi Dev Server. Tunggu server sampai tunnel aktif.
+9. Ambil link ngrok via `npx node -e "const http = require('http'); http.get('http://127.0.0.1:4040/api/tunnels', res => { let data = ''; res.on('data', chunk => data += chunk); res.on('end', () => console.log(data)); });"`
 
-3. PATCH HOT-FIX FILE MODULES ERROR AI STUDIO:
-   - (A) Bypass "Uncaught TypeError: Cannot set property fetch..." (Layar blank Web): 
-     `npx node -e "const fs = require('fs'); const files = ['my-app/node_modules/whatwg-fetch/fetch.js', 'my-app/node_modules/whatwg-fetch/dist/fetch.umd.js', 'my-app/node_modules/cross-fetch/dist/browser-polyfill.js']; for (let file of files) { if (!fs.existsSync(file)) continue; let c = fs.readFileSync(file, 'utf8'); c = c.replace('g.fetch = fetch', 'try { g.fetch = fetch } catch (e) {}'); fs.writeFileSync(file, c); }"`
+IMPORTANT:
+Jika ada error di langkah mana pun:
+- berhenti, tampilkan error inti, perbaiki error, ulangi langkah yang gagal.
+Jangan lompat ke preview. Jangan bilang selesai terlalu cepat.
 
-   - (B) Bypass Error CORS "Unauthorized request..." (Red screen Blocked): 
-     `npx node -e "const fs = require('fs'); const file = 'my-app/node_modules/expo/node_modules/@expo/cli/build/src/start/server/middleware/CorsMiddleware.js'; let content = fs.readFileSync(file, 'utf8'); content = content.replace('if (!isSameOrigin && !isAllowedHost) {', 'if (false) {'); fs.writeFileSync(file, content);"`
+Setelah server web berjalan sukses, TAMPILKAN:
+- Status Berhasil
+- URL Localhost dan URL Tunnel Expo (`exp://...` dan `https://...`)
+- Langkah berikutnya
 
-4. VALIDASI DAN TAMPILKAN HASILNYA
-   - PENTING: Clear cache bundler sebelum jalan agar file yang dipatch efektif: `rm -rf my-app/.expo`
-   - Gunakan tools AI atau terminal untuk mendapatkan URI Tunnel ngrok anda dengan script:
-     `npx node -e "const http = require('http'); http.get('http://127.0.0.1:4040/api/tunnels', res => { let data = ''; res.on('data', chunk => data += chunk); res.on('end', () => console.log(data)); });"`
-   - Output url Expo tunnel final: `exp://<ID_NGROK>.exp.direct:80` (Arahkan user untuk Scan dan Upgrade app Expo Go jika tidak kompatibel).
+Output sebelum server aktif hanya boleh: progres, error, tindakan perbaikan.
 ```

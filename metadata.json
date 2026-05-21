@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "description": "",
+  "name": "Expo React Native Setup",
+  "description": "Template lengkap setup Expo React Native SDK 55 di lingkungan Google AI Studio dengan Ngrok tunneling.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
