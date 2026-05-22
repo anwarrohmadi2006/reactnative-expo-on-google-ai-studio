@@ -27,32 +27,32 @@ Setelah *source code* mendarat di Workspace, **JANGAN MENYALAKAN SERVER TERLEBIH
 
 ---
 
-## Langkah 2: "The Magic Prompt" (Prompt Super Komprehensif)
+## Langkah 2: "The Magic Prompt" (Prompt Super Mudah & Otomatis)
 
 Segera setelah repositori selesai dimuat ke *workspace* Anda, **COPY DAN PASTE PROMPT DI BAWAH INI** secara utuh ke dalam kotak _chat_ (kolom interaksi dengan Agen AI). 
 
-Prompt ini adalah perintah rekayasa balik (*Execute-First migration*) yang memaksa Agen AI untuk memvaksinasi proyek Anda dari semua _error_ bawaan Cloud Container.
+Karena kami telah merakit skrip pemulihan dan penyiapan otomatis di dalam repositori ini, Agen AI baru Anda tidak perlu melakukan penambalan secara manual. Anda cukup menyuruhnya menjalankan perintah dev terpadu.
 
 ### 📋 COPY PROMPT INI:
 
-> "Saya baru saja meng-clone repositori Expo React Native ini dari GitHub. Jangan jalankan npm start atau dev script apa pun dulu! Lakukan rutinitas inisiasi mutlak berikut secara berurutan:
+> "Saya baru saja meng-clone repositori Expo React Native ini. Tolong jalankan perintah dev server dengan mengetik:
+> `npm run dev`
 > 
-> 1. Aktifkan skill `github-import-migration` dan pastikan konfigurasi `package.json` dieksekusi agar berjalan murni pada HOST `0.0.0.0` dan PORT `3000`. Jangan gunakan port lain.
-> 2. Lacak file `whatwg-fetch/fetch.js` dan `cross-fetch/dist/browser-polyfill.js` di dalam direktori `node_modules`. Patch setiap baris penugasan `g.fetch = fetch` atau `self.fetch = fetch` agar dibungkus dengan `try { ... } catch (e) {}` untuk menghindari error `Uncaught TypeError: Cannot set property fetch of #<Window>`.
-> 3. Gambar `react-logo.png` dan `tutorial-web.png` di folder `assets/images` biasanya rusak saat cloning. Tolong timpa/replace file-file gambar tersebut dengan dummy data transparan/standar via node script untuk menghindari error `unsupported file type: undefined` di Metro Bundler, atau download ulang versi aslinya.
-> 4. Hapus folder cache `.expo` secara rekursif jika ada.
-> 5. Setelah instalasi dependensi beres, nyalakan server latar belakang secara asinkron (misalnya `npx expo start --web --tunnel --port 3000`).
-> 6. Terakhir, tampilkan URL publik Ngrok (exp://... dan https://...) yang berhasil diekstrak."
+> Perintah ini secara otomatis akan mengeksekusi skrip `setup-gstudio.cjs` yang akan memeriksa dependensi, mengunduh `@expo/ngrok`, memindai dan memperbaiki semua gambar biner yang rusak (seperti `expo-logo.png`), menambal polyfill fetch & CORS, serta menyalakan Metro server secara aman dengan tunnel Ngrok di PORT `3000` dan HOST `0.0.0.0`.
+> 
+> Setelah Metro bundler selesai membundel dan tunnel Ngrok aktif, tolong berikan saya URL ngrok-nya (exp://... dan https://...) untuk pratinjau aplikasi."
 
 ---
 
-## Mengapa Prompt Tersebut Sangat Penting? (Anatomi Solusi)
+## Mengapa Prosedur Ini Sangat Penting? (Anatomi Solusi Otomatis)
 
-Prompt di atas bukanlah sekadar kalimat biasa, ini adalah *blueprint* untuk mencegah penyakit-penyakit kronis pada sistem kontainer AI Studio:
+Pematuhan skrip otomatis ini membebaskan Anda dari berbagai penyakit kronis pada sistem kontainer AI Studio:
 
-1. **Host 0.0.0.0 & Port 3000:** Memastikan rute API tembus melalui nginx Proxy dari arsitektur Docker/Cloud Run milik Google. Infrastruktur hanya membuka port 3000.
-2. **Obat Layar Putih (Patch Polyfill):** Lingkungan Iframe AI Studio membatasi obyek `window.fetch` menjadi properti yang hanya bisa dibaca (_read-only_). Usaha `cross-fetch` untuk memodifikasinya saat inisiasi Klien akan membuat aplikasi _React_ Anda berhenti total secara tiba-tiba (_Crash Uncaught TypeError_). Pembungkusan `try/catch` membiarkan error ini *lewat* tanpa membunuh sistem.
-3. **Mengatasi Kasus Gambar Transmisi Rusak:** Transisi aset gambar ber-ekstensi `.png` saat di-clone ke _ephemeral system_ Google bisa mengubah magic number *header binary* di dalam file-nya. Metro bundler (*React Native bundler*) akan mogok bekerja dan mengeluhkan format file yang tak dikenali. Node script pada prompt ini akan merestorasi atau nge-_bypass_ file yang cacat tersebut dengan segera.
+1. **Host 0.0.0.0 & Port 3000:** Memastikan rute proxy internal dari Docker Google AI Studio dapat diakses dari luar.
+2. **Scan & Perbaikan Gambar Biner Rekursif:** Skrip otomatis mendeteksi file gambar `.png` yang rusak secara rekursif dan menambalnya dengan gambar transparan 1x1 valid agar Metro bundler tidak crash dengan error `unsupported file type`.
+3. **Obat Layar Putih (Patch Polyfill):** Menambal berkas `whatwg-fetch` dan `cross-fetch` agar aman dari properti read-only `window.fetch` di dalam sandbox iframe.
+4. **Bypass CORS:** Menambal middleware CORS `@expo/cli` secara instan agar mengizinkan request dari URL proxy Google AI Studio.
+
 4. **Pembasmian Cache Hantu:** File meta di `.expo/` sering kali menyimpan pengaturan *port* lawas hasil *clone* Anda dari komputer lama. Menghapusnya adalah keharusan (Clear Cache).
 5. **Ekstraksi URL Tunnel Real-Time:** Menyelamatkan Anda dari batasan fungsi API Iframe. Dengan disediakannya link Ngrok eksternal, Anda bisa menekan tombol **"Buka di Tab Baru"**, terbebas dari *sandbox constraints*, dan OAUTH/Login/Database akan bekerja 100% mulus.
 
