@@ -105,28 +105,44 @@ if (!corsPatched) {
 
 // 4. Overwrite potential corrupt images with a valid 1x1 transparent PNG
 console.log('\n🖼️ Checking and repairing potential binary image corruptions...');
-const imagesToRepair = [
-  path.join(namaAppDir, 'assets/images/react-logo.png'),
-  path.join(namaAppDir, 'assets/images/react-logo@2x.png'),
-  path.join(namaAppDir, 'assets/images/react-logo@3x.png'),
-  path.join(namaAppDir, 'assets/images/tutorial-web.png')
-];
 
 // Valid 1x1 transparent PNG Buffer
 const transparentPng = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
 
-imagesToRepair.forEach(imagePath => {
-  if (fs.existsSync(imagePath)) {
-    try {
-      fs.writeFileSync(imagePath, transparentPng);
-      console.log(`  ✅ Restored dummy PNG: ${path.relative(__dirname, imagePath)}`);
-    } catch (e) {
-      console.warn(`  ⚠️ Failed to write image ${path.relative(__dirname, imagePath)}:`, e.message);
+function checkAndRepairPNGs(dir) {
+  if (!fs.existsSync(dir)) return;
+  const files = fs.readdirSync(dir);
+  files.forEach(file => {
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+    if (stat.isDirectory()) {
+      checkAndRepairPNGs(fullPath);
+    } else if (file.toLowerCase().endsWith('.png')) {
+      try {
+        const buffer = fs.readFileSync(fullPath);
+        // PNG header is 89 50 4E 47 0D 0A 1A 0A
+        const isPng = buffer.length >= 8 &&
+                      buffer[0] === 0x89 &&
+                      buffer[1] === 0x50 &&
+                      buffer[2] === 0x4E &&
+                      buffer[3] === 0x47 &&
+                      buffer[4] === 0x0D &&
+                      buffer[5] === 0x0A &&
+                      buffer[6] === 0x1A &&
+                      buffer[7] === 0x0A;
+        if (!isPng) {
+          fs.writeFileSync(fullPath, transparentPng);
+          console.log(`  ✅ Repaired corrupted PNG: ${path.relative(namaAppDir, fullPath)}`);
+        }
+      } catch (err) {
+        console.warn(`  ⚠️ Failed to check/repair image ${path.relative(namaAppDir, fullPath)}:`, err.message);
+      }
     }
-  } else {
-    console.log(`  🔍 Image not found (skipping): ${path.relative(__dirname, imagePath)}`);
-  }
-});
+  });
+}
+
+// Recursively verify all PNG assets in nama-app/assets/
+checkAndRepairPNGs(path.join(namaAppDir, 'assets'));
 
 // 5. Clear expo cache
 console.log('\n🧹 Clearing Expo Cache (.expo folder)...');
