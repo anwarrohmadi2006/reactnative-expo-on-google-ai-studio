@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "setup-expo": "cd nama-app && npx expo install --fix",
+    "setup-gstudio": "node setup-gstudio.cjs",
     "expo-doctor": "cd nama-app && npx expo-doctor",
     "expo-web": "echo \"Args: $@\" > expo-log.txt && cd nama-app && PORT=3000 npx expo start --web -p 3000 >> expo-log.txt 2>&1",
-    "dev": "cd nama-app && CI=1 EXPO_NO_DEVTOOLS=1 HOST=0.0.0.0 PORT=3000 npx expo start --web --tunnel --port 3000 #",
+    "dev": "node setup-gstudio.cjs && cd nama-app && CI=1 EXPO_NO_DEVTOOLS=1 HOST=0.0.0.0 PORT=3000 npx expo start --web --tunnel --port 3000 #",
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",

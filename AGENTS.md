@@ -14,9 +14,11 @@
 ## 2. STANDAR OPERASIONAL PROSEDUR (SOP) SAAT "REMIX" ATAU CONTAINER-WAKEUP
 Jika interaksi pertama dari pengguna meminta *"menyalakan server"*, *"melihat pratinjau"*, atau aplikasi sedang memperlihatkan kondisi mati/blank:
 1. **Tunda Kodifikasi UI:** JANGAN mengubah kode logika (seperti `App.js` / komponen) apa pun terlebih dahulu. Fokus utamakan hidupnya infrastruktur.
-2. **Penghancuran Cache:** Eksekusi *shell* untuk menghapus cache lawas: `rm -rf my-app/.expo` (Ganti `my-app` sesuai direktori aplikasi pengguna saat ini).
-3. **Start Asinkron:** Jalankan skrip *development* mutlak secara *background* (agar tidak memblokir perintah lain): 
-   `npx expo start --web --tunnel --port 3000` (Gunakan skrip `npm run dev` jika tersedia).
+2. **Jalankan Patch & Setup Otomatis:** Eksekusi perintah setup di root workspace:
+   `node setup-gstudio.cjs`
+   (Ini akan otomatis menjalankan `npm install`, mem-patch polyfill fetch read-only, membypass CORS middleware Expo CLI, memperbaiki biner gambar rusak, dan membersihkan folder cache `.expo`).
+3. **Start Asinkron:** Jalankan skrip *development* secara *background* (agar tidak memblokir perintah lain): 
+   `npm run dev`
 4. **Ekstraksi Dynamic Tunnel:** Anda WAJIB mendapatkan URL Ngrok aktif melalui skrip pinger:
    `npx node -e "const http = require('http'); http.get('http://127.0.0.1:4040/api/tunnels', res => { let data = ''; res.on('data', chunk => data += chunk); res.on('end', () => console.log(data)); });"`
 5. **Publikasi URL Real-Time:** Ekstrak _response_ pada langkah 4 dan tampilkan URL berawalan `exp:///..` (untuk tes di Expo Go Mobile) serta `https://...` (untuk tes *Open in New Tab*) secara rapi dan profesional kepada pengguna. 
